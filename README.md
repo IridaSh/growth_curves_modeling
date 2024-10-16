@@ -24,11 +24,14 @@ The **Bacterial Growth Simulation** project models the dynamics of bacterial pop
 git clone https://github.com/IridaSh/growth_curves_modeling.git
 ```
 # Create and activate the virtual environment
-uv create .venv
+```bash
+uv venv
+```
 
-# Install dependencies
-uv install
-
+# Sync dependecies
+```bash
+uv sync
+```
 # Running Simulations
 
 Execute the main script to perform simulations and generate plots:
