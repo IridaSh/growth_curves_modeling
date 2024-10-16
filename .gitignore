@@ -1,0 +1,47 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Data files
+data/simulated/curves10k.npz
+data/simulated/*.npz
+
+# Logs
+*.log
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# MacOS specific files
+.DS_Store
+
+# Python egg files
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+*.manifest
+*.spec
+
+# Temporary files
+*.tmp
+*.temp
+
+# IDE specific files (e.g., VSCode, PyCharm)
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
