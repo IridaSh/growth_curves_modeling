@@ -11,8 +11,11 @@ dependencies = [
     "ipykernel>=6.29.5",
     "pandas>=2.2.3",
     "black>=24.10.0",
+    "torch>=2.5.0",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+[tool.hatch.build.targets.wheel]
+packages = ["src/foo"]
