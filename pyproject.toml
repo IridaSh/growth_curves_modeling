@@ -3,7 +3,7 @@ name = "irida-trials"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.1.1",
     "scipy>=1.14.1",
@@ -12,6 +12,7 @@ dependencies = [
     "pandas>=2.2.3",
     "black>=24.10.0",
     "torch>=2.5.0",
+    "scikit-learn>=1.5.2",
 ]
 
 [build-system]
