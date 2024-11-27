@@ -54,7 +54,7 @@ Arguments:
 2. MLP and VAE Combined Training
 
 After training the desired VAE model, use the combined training scripts to train the MLP based on the VAE’s latent representations.
-``bash
+```bash
 cd ../mlp_vae_training_scripts/
 python main.py --model VAE
 ```
