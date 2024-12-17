@@ -1,0 +1,11 @@
+{
+    "model_type": "DeepCNNVAE",
+    "model_path": "train_vae_output/DeepCNNVAE_LD10_LC16_LR0.001_TS20241126_221446/models/best_model.pt",
+    "mse": 0.00014324534615382638,
+    "timestamp": "2024-12-10T15:48:51.429645",
+    "parameters": {
+        "latent_dim": 10,
+        "latent_channel": 16,
+        "batch_size": 32
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "model_type": "ResidualCNNVAE",
+    "model_path": "train_vae_output/ResidualCNNVAE_LD10_LC16_LR0.001_TS20241126_215733/models/best_model.pt",
+    "mse": 0.00019963043586210196,
+    "timestamp": "2024-12-10T14:58:31.976095",
+    "parameters": {
+        "latent_dim": 10,
+        "latent_channel": 16,
+        "batch_size": 32
+    }
+}
