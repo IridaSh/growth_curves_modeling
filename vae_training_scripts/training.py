@@ -51,3 +51,17 @@ def get_latent_variables(model, dataloader, device):
             _, mean, _ = model(data)
             all_latent_vars.append(mean.detach().cpu())
     return torch.cat(all_latent_vars)
+
+# evaluation.py
+def calculate_mse(model, dataloader, device):
+    """Calculate Mean Squared Error for the VAE reconstructions."""
+    model.eval()
+    mse_values = []
+    with torch.no_grad():
+        for data in dataloader:
+            data = data.to(device)
+            reconstruction, _, _ = model(data)
+            mse = torch.mean((reconstruction - data) ** 2).item()
+            mse_values.append(mse)
+    avg_mse = sum(mse_values) / len(mse_values)
+    return avg_mse
