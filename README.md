@@ -23,7 +23,7 @@ growth_curves_modeling/
 ├── mlp_vae_training_scripts/   # Scripts for training MLP and VAE models
 ├── train_vae_output/       	# Output results and checkpoints from VAE training
 ├── train_vae_mlp_output/   	# Combined VAE-MLP training output
-│
+├── parameter_validation/   	# Scripts and results for R^2 for parameter validation
 ├── nonlinear_methods/          # Nonlinear optimization methods for parameter estimation
 │
 ├── vae_training_scripts/       # Scripts for VAE model training
@@ -105,3 +105,34 @@ python vae_training_scripts/evaluate_model.py \
     --latent-channel 16 \
     --batch-size 32
 ```
+## Parameter validation
+This directory contains code for validating the parameters estimated by neural network models against true simulation parameters. The pipeline compares predicted parameters with the original simulation parameters and generates visualization plots and metrics to assess model performance.
+Execute the validation script using:
+```bash
+python parameter_validation/main.py \
+    --data-dir $DATA_DIR \
+    --isolates-path $ISOLATES_PATH \
+    --true-params $TRUE_PARAMS \
+    --simulated-params $SIMULATED_PARAMS \
+    --predicted-params $PREDICTED_PARAMS \
+    --output-dir $OUTPUT_DIR \
+```
+Arguments:
+- `--data-dir`: Directory containing simulation data
+- `--isolates-path`: Path to isolates data file
+- `--true-params`: Path to true parameters (`curves10k.npz`)
+- `--simulated-params`: Path to simulated parameters (`parameters.npy`)
+- `--predicted-params`: Path to predicted parameters (`NN-estimated-parameters.npy`)
+- `--output-dir`: Directory for saving results
+
+Output Files:
+- `parameter_validation.log`: Detailed logging of the validation process
+- `validation_results.npz`: Contains:
+  - `curve_r2_scores`: R² scores for each condition and variable
+  - `parameter_r2_scores`: R² scores for each parameter
+  - `conditions`: List of simulation conditions
+  - `parameter_names`: List of parameter names
+  - `variable_names`: List of variable names
+- `plots/`: Directory containing visualization plots:
+  - Curve comparison plots for each condition and variable
+  - Parameter comparison scatter plots
