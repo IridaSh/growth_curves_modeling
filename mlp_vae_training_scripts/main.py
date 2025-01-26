@@ -23,7 +23,7 @@ from vae_training_scripts.models.residual_cnn_vae import ResidualCNNVAE
 import argparse
 from datetime import datetime
 
-def main(model_choice):
+def main(args):
     # Configure logging
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     
@@ -31,12 +31,12 @@ def main(model_choice):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logging.info(f'Using device: {device}')
 
-    # Hyperparameters
+    # Hyperparameters (now with arg-based overrides)
     batch_size = 32
     latent_dim = 10
     latent_channel = 16
-    lr = 1e-3            # Learning rate
-    min_lr = 4e-6        # Minimum learning rate
+    lr = 1e-3
+    min_lr = 4e-6
     epochs = 1000
     gamma = 0.98
     weight_decay = 1e-5
@@ -44,42 +44,38 @@ def main(model_choice):
     warmup_epochs = 8
     patience = 30
     percentage = 0.2
-    
-   # Validate model choice
+
+    # Validate model choice
     valid_models = ['VAE', 'DeepCNNVAE', 'ResidualCNNVAE']
-    if model_choice not in valid_models:
-        raise ValueError(f"Invalid model choice '{model_choice}'. Valid options are: {valid_models}")
+    if args.model not in valid_models:
+        raise ValueError(f"Invalid model choice '{args.model}'. Valid options are: {valid_models}")
     
-    # File paths
+    # File paths configuration
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     model_name = (
-        'VAE' if model_choice == 'vae' else
-        'DeepCNNVAE' if model_choice == 'deep_cnn_vae' else
+        'VAE' if args.model == 'VAE' else
+        'DeepCNNVAE' if args.model == 'DeepCNNVAE' else
         'ResidualCNNVAE'
     )
     
-    # Define file paths after defining timestamp and model_name
-    data_file = 'data/simulated/curves10k.npz'         # Adjust the path as needed
-    parameter_file = 'data/simulated/parameters.npy'   # Adjust the path as needed
-    vae_model_path = 'train_vae_output/ResidualCNNVAE_LD10_LC16_LR0.001_TS20241126_215733/models/best_model.pt'  # Adjust the path as needed
     output_dir = f'train_vae_mlp_output/{model_name}_LD{latent_dim}_LC{latent_channel}_LR{lr}_TS{timestamp}'
+    
+    # Create directory structure
     plots_dir = os.path.join(output_dir, 'plots')
+    models_dir = os.path.join(output_dir, 'models')
     predictions_save_path = os.path.join(output_dir, 'NN-estimated-parameters.npy')
     
-    # Create necessary directories
     create_directory(output_dir)
-    create_directory(os.path.join(output_dir, 'models'))
+    create_directory(models_dir)
     create_directory(plots_dir)
     
     # Load and normalize data
     normalized_data, normalized_parameters, input_size, output_size, scaler_data, parameter_scale, parameter_names = normalize_data(
-        data_file, parameter_file
+        args.data_file, args.parameter_file
     )
     
-    # Get indices for train/test split
+    # Split data
     indices = np.arange(len(normalized_data))
-    
-    # Split data into training and testing sets
     X_train, X_test, y_train, y_test, train_indices, test_indices = train_test_split(
         normalized_data, 
         normalized_parameters, 
@@ -94,157 +90,138 @@ def main(model_choice):
     y_train = torch.from_numpy(y_train).float()
     y_test = torch.from_numpy(y_test).float()
     
-    # DataLoader
-    train_dataset = TensorDataset(X_train, y_train)
-    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    test_dataset = TensorDataset(X_test, y_test)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    # DataLoader setup
+    train_loader = DataLoader(TensorDataset(X_train, y_train), 
+                             batch_size=batch_size, shuffle=True, num_workers=4)
+    test_loader = DataLoader(TensorDataset(X_test, y_test), 
+                            batch_size=batch_size, shuffle=False, num_workers=4)
     
-    # Initialize models
+    # Model initialization
     mlp_model = MLP(latent_dim, hidden_size, output_size).to(device)
-    # Initialize models based on user choice
-    if model_choice == 'VAE':
+    
+    if args.model == 'VAE':
         vae_model = VAE(latent_dim, latent_channel, input_size).to(device)
-    elif model_choice == 'DeepCNNVAE':
+    elif args.model == 'DeepCNNVAE':
         vae_model = DeepCNNVAE(latent_dim, latent_channel, input_size).to(device)
-    elif model_choice == 'ResidualCNNVAE':
+    elif args.model == 'ResidualCNNVAE':
         vae_model = ResidualCNNVAE(latent_dim, latent_channel, input_size).to(device)
     
     logging.info(f'{model_name} model instantiated.')
 
-    # Load the trained VAE model
+    # Load and freeze VAE
     try:
-        vae_model.load_state_dict(torch.load(vae_model_path))
-        logging.info(f'{model_name} model loaded from {vae_model_path}')
+        vae_model.load_state_dict(torch.load(args.vae_model_path))
+        logging.info(f'Loaded {model_name} from {args.vae_model_path}')
     except Exception as e:
-        logging.error(f'Error loading {model_name} model from {vae_model_path}: {e}')
+        logging.error(f'Error loading VAE: {e}')
         raise
     
-    # Freeze VAE model parameters
     for param in vae_model.parameters():
         param.requires_grad = False
-    logging.info(f'{model_name} model parameters frozen.')
     
-    
-    # Create an instance of the combined model
+    # Combined model setup
     combined_model = CombinedModel(vae_model, mlp_model).to(device)
-    logging.info('Combined model instantiated.')
-    
-    # Count parameters
+    logging.info('Combined model ready.')
     count_parameters(combined_model)
     
-    # Loss function and optimizer for training the MLP model
+    # Training setup
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(mlp_model.parameters(), lr=lr, weight_decay=weight_decay)
     
-    # Initialize learning rate schedulers
+    # Learning rate schedulers
     def warmup_scheduler(epoch):
-        if epoch < warmup_epochs:
-            return (epoch + 1) / warmup_epochs
-        else:
-            return 1.0
-
-    scheduler1 = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=warmup_scheduler)
+        return (epoch + 1) / warmup_epochs if epoch < warmup_epochs else 1.0
+    
+    scheduler1 = torch.optim.lr_scheduler.LambdaLR(optimizer, warmup_scheduler)
     scheduler2 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
     
-    # Initialize early stopping parameters
-    best_test_loss = np.inf  # Best test loss so far
-    epochs_no_improve = 0  # Counter for epochs since the test loss last improved
-    
     # Training loop
-    train_loss_values = []
-    test_loss_values = []
+    best_test_loss = np.inf
+    epochs_no_improve = 0
+    train_losses, test_losses = [], []
     
     for epoch in range(epochs):
         train_loss = train(combined_model, train_loader, optimizer, criterion, device)
         test_loss = test(combined_model, test_loader, criterion, device)
-        train_loss_values.append(train_loss)
-        test_loss_values.append(test_loss)
-    
-        # Clamp minimum learning rate
+        train_losses.append(train_loss)
+        test_losses.append(test_loss)
+        
+        # Learning rate management
         for param_group in optimizer.param_groups:
             param_group['lr'] = max(param_group['lr'], min_lr)
         current_lr = optimizer.param_groups[0]['lr']
-    
+        
         # Logging
-        interval = 2 if epoch < 10 else 40
-        if (epoch + 1) % interval == 0:
-            logging.info(f'Epoch: {epoch + 1} | Train Loss: {train_loss:.7f} | Test Loss: {test_loss:.7f} | Lr: {current_lr:.8f}')
-    
-        # Update learning rate
+        if (epoch + 1) % (2 if epoch < 10 else 40) == 0:
+            logging.info(f'Epoch {epoch+1:4d} | Train Loss: {train_loss:.4f} | Test Loss: {test_loss:.4f} | LR: {current_lr:.2e}')
+        
+        # Update schedulers
         if epoch < warmup_epochs:
             scheduler1.step()
         else:
             scheduler2.step()
-    
-        # Check for early stopping
+        
+        # Early stopping
         if test_loss < best_test_loss:
             best_test_loss = test_loss
-            epochs_no_improve = 0  # Reset the counter
-            # Optionally, save the best model here
+            epochs_no_improve = 0
+            torch.save(combined_model.state_dict(), os.path.join(models_dir, 'best_combined_model.pt'))
+            logging.info(f'New best model saved with test loss: {test_loss:.4f}')
         else:
-            epochs_no_improve += 1  # Increment the counter
-    
+            epochs_no_improve += 1
+            
         if epochs_no_improve >= patience:
-            logging.info('Early stopping!')
-            break  # Exit the loop
+            logging.info(f'Early stopping after {patience} epochs without improvement')
+            break
     
-    logging.info('Finished Training')
+    # Final model save
+    torch.save(combined_model.state_dict(), os.path.join(models_dir, 'final_combined_model.pt'))
+    logging.info(f'Training complete. Models saved to {models_dir}')
     
-    # Plotting the loss values and saving the figure
-    loss_plot_path = os.path.join(plots_dir, 'training_testing_loss.png')
-    plot_loss_curves(train_loss_values, test_loss_values, loss_plot_path)
+    # Post-processing
+    plot_loss_curves(train_losses, test_losses, os.path.join(plots_dir, 'training_curves.png'))
     
-    # Calculate the number of samples to retrieve
-    num_train_samples = int(len(train_dataset) * percentage)
-    num_test_samples = int(len(test_dataset) * percentage)
-    
-    # Get the tensor data without labels
-    subset_train_input = train_dataset[:num_train_samples][0]
-    subset_test_input = test_dataset[:num_test_samples][0]
-    
+    # Prediction and plotting
+    sample_size = int(len(train_loader.dataset) * percentage)
     with torch.no_grad():
-        output_train = combined_model(subset_train_input.to(device))
-        output_test = combined_model(subset_test_input.to(device))
+        train_pred = combined_model(X_train[:sample_size].to(device)).cpu().numpy() * parameter_scale
+        test_pred = combined_model(X_test[:sample_size].to(device)).cpu().numpy() * parameter_scale
     
-    # Denormalize the predicted parameters
-    subset_train_data = y_train[:num_train_samples].cpu().numpy() * parameter_scale
-    subset_test_data = y_test[:num_test_samples].cpu().numpy() * parameter_scale
-    output_train = output_train.cpu().numpy() * parameter_scale
-    output_test = output_test.cpu().numpy() * parameter_scale
-    
-    # Plot parameter predictions
     plot_parameter_predictions(
-        subset_train_data, output_train, 
-        subset_test_data, output_test, 
-        parameter_names, 
+        y_train[:sample_size].numpy() * parameter_scale,
+        train_pred,
+        y_test[:sample_size].numpy() * parameter_scale,
+        test_pred,
+        parameter_names,
         plots_dir
     )
     
-    # Combine the predicted values (from training and test sets)
-    combined_predictions = np.zeros((len(normalized_parameters), output_size))
-    
+    # Save full predictions
     with torch.no_grad():
-        # Full predictions on train and test data
-        full_output_train = combined_model(X_train.to(device)).cpu().numpy() * parameter_scale
-        full_output_test = combined_model(X_test.to(device)).cpu().numpy() * parameter_scale
+        full_preds = np.zeros_like(normalized_parameters) * parameter_scale
+        full_preds[train_indices] = combined_model(X_train.to(device)).cpu().numpy() * parameter_scale
+        full_preds[test_indices] = combined_model(X_test.to(device)).cpu().numpy() * parameter_scale
     
-    # Place the predictions in the combined_predictions array
-    combined_predictions[train_indices] = full_output_train
-    combined_predictions[test_indices] = full_output_test
-    
-    # Save the combined predicted parameter values in original order
-    save_predictions(combined_predictions, predictions_save_path)
+    save_predictions(full_preds, predictions_save_path)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Train a VAE model with MLP for parameter prediction.")
-    parser.add_argument(
-        '--model', 
-        type=str, 
-        default='VAE', 
-        help="Choose the model type: 'VAE', 'DeepCNNVAE', or 'ResidualCNNVAE'. Default is 'VAE'."
-    )
-    args = parser.parse_args()
+    parser = argparse.ArgumentParser(description="VAE+MLP Parameter Estimation")
     
-    # Call the main function with the selected model type
-    main(args.model)
+    # Model configuration
+    parser.add_argument('--model', type=str, default='VAE',
+                       choices=['VAE', 'DeepCNNVAE', 'ResidualCNNVAE'],
+                       help='Choice of VAE architecture')
+    
+    # Data paths
+    parser.add_argument('--data_file', type=str, 
+                       default='data/simulated/curves10k.npz',
+                       help='Path to input light curve data')
+    parser.add_argument('--parameter_file', type=str,
+                       default='data/simulated/parameters.npy',
+                       help='Path to simulation parameters')
+    parser.add_argument('--vae_model_path', type=str,
+                       default='train_vae_output/VAE_LD10_LC16_LR0.001_TS20241126_002111/models/best_model.pt',
+                       help='Path to pretrained VAE model')
+    
+    args = parser.parse_args()
+    main(args)
