@@ -1,4 +1,3 @@
-# models/model_architecture1.py
 import torch.nn as nn
 import torch.nn.functional as F
 from .base_vae import BaseVAE
