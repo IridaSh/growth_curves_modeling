@@ -53,11 +53,64 @@ def setup_logger(output_dir: Path) -> logging.Logger:
     
     return logger
 
+def extract_model_name(predicted_params_path: Path) -> str:
+    """Extract model name from the predicted parameters path
+    Path structure example: train_vae_mlp_output/DeepCNNVAE_LD10_LC16_LR0.001_TS20241126_233801/NN-estimated-parameters.npy
+    """
+    try:
+        # Get the directory containing timestamp (parent of NN-estimated-parameters.npy)
+        timestamp_dir = predicted_params_path.parent
+        # Get the model output directory (parent of timestamp directory)
+        model_output_dir = timestamp_dir.parent
+        # Get just the directory name containing the timestamp
+        model_info = timestamp_dir.name
+        # Extract the model name (part before _LD)
+        model_name = model_info.split('_LD')[0]
+        return model_name
+    except Exception as e:
+        logger.warning(f"Could not extract model name from path: {e}")
+        return "unknown_model"
+
+def calculate_metrics(true_values, predicted_values):
+    """
+    Calculate MAR and RMSE between true and predicted values.
+
+    Parameters:
+    - true_values: numpy array of ground truth values.
+    - predicted_values: numpy array of predicted values.
+
+    Returns:
+    - mar: Mean Absolute Residual
+    - rmse: Root Mean Square Error
+    """
+    # Ensure inputs are numpy arrays
+    true_values = np.array(true_values)
+    predicted_values = np.array(predicted_values)
+
+    # Calculate residuals
+    residuals = true_values - predicted_values
+
+    # Calculate MAR
+    mar = np.mean(np.abs(residuals))
+
+    # Calculate RMSE
+    rmse = np.sqrt(np.mean(residuals**2))
+
+    return mar, rmse
+
 def main():
    # Parse arguments and setup
     args = parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     logger = setup_logger(args.output_dir)
+    
+    # Extract model name and create model-specific output directory
+    model_name = extract_model_name(args.predicted_params)
+    args.output_dir = args.output_dir / model_name
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    
+    logger = setup_logger(args.output_dir)
+    logger.info(f"Model type identified: {model_name}")
     
     try:
         logger.info("Starting parameter validation")
@@ -74,7 +127,7 @@ def main():
         logger.info(f"Combined data shape after shuffling: {all_data.shape}")
         
         # Initialize simulation parameters
-        n0 = 0.03
+        n0 = 0.03 #to ensure that we have a starting density, else there might be no community created int he density is lower
         conditions = [(0, 0), (10, 0), (10, 10)]
         
         # Load true and predicted parameters
@@ -111,11 +164,17 @@ def main():
                 original = true_curves[:, condition_idx, variable_idx, :].flatten()
                 predicted = simulated_curves[:, condition_idx, variable_idx, :].flatten()
                 r2_scores[condition_idx, variable_idx] = r2_score(original, predicted)
+                 # MAR and RMSE
+                mar, rmse = calculate_metrics(original, predicted)
+        
+                # logger.info(f"Condition: a0={conditions[condition_idx][0]}, inh0={conditions[condition_idx][1]}, "
+                #     f"Variable: {variable_names[variable_idx]}, "
+                #     f"R²: {r2:.3f}, MAR: {mar:.3f}, RMSE: {rmse:.3f}")
                 
                 logger.info(f"Condition: a0={conditions[condition_idx][0]}, "
                           f"inh0={conditions[condition_idx][1]}, "
                           f"R² for {variable_names[variable_idx]}: "
-                          f"{r2_scores[condition_idx, variable_idx]:.3f}")
+                          f"{r2_scores[condition_idx, variable_idx]:.3f},MAR: {mar:.3f}, RMSE: {rmse:.3f} " )
         
         # Create plots directory
         plots_dir = args.output_dir / 'plots'
