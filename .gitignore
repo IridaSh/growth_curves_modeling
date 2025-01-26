@@ -15,6 +15,17 @@ venv.bak/
 data/simulated/curves10k.npz
 data/simulated/*.npz
 
+train_vae_mlp_output/*/models/
+!train_vae_mlp_output/
+!train_vae_mlp_output/*/
+!train_vae_mlp_output/*/plots/
+
+train_vae_output/*/models/
+!train_vae_output/
+!train_vae_output/*/
+!train_vae_output/*/plots/
+
+
 # Logs
 *.log
 
