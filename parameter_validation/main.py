@@ -164,13 +164,8 @@ def main():
                 original = true_curves[:, condition_idx, variable_idx, :].flatten()
                 predicted = simulated_curves[:, condition_idx, variable_idx, :].flatten()
                 r2_scores[condition_idx, variable_idx] = r2_score(original, predicted)
-                 # MAR and RMSE
                 mar, rmse = calculate_metrics(original, predicted)
-        
-                # logger.info(f"Condition: a0={conditions[condition_idx][0]}, inh0={conditions[condition_idx][1]}, "
-                #     f"Variable: {variable_names[variable_idx]}, "
-                #     f"R²: {r2:.3f}, MAR: {mar:.3f}, RMSE: {rmse:.3f}")
-                
+                   
                 logger.info(f"Condition: a0={conditions[condition_idx][0]}, "
                           f"inh0={conditions[condition_idx][1]}, "
                           f"R² for {variable_names[variable_idx]}: "
