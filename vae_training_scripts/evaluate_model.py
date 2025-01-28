@@ -16,11 +16,18 @@ from training import calculate_mse
 from data_loading import load_simulated_data, load_isolates_data
 
 
-def setup_logger(log_dir):
-    """Set up logging configuration"""
-    Path(log_dir).mkdir(parents=True, exist_ok=True)
+def create_output_dir(base_dir, model_type, latent_dim, latent_channel):
+    """Create a unique output directory based on model configuration and timestamp."""
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    log_file = Path(log_dir) / f'evaluation_{timestamp}.log'
+    dir_name = f"{model_type}_LD{latent_dim}_LC{latent_channel}_TS{timestamp}"
+    output_dir = Path(base_dir) / dir_name
+    output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
+
+
+def setup_logger(output_dir):
+    """Set up logging configuration with a descriptive log file name."""
+    log_file = output_dir / f"{output_dir.name}.log"
     
     logging.basicConfig(
         level=logging.INFO,
@@ -34,10 +41,8 @@ def setup_logger(log_dir):
 
 
 def save_results(results, output_dir):
-    """Save evaluation results to JSON file"""
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    result_file = Path(output_dir) / f'evaluation_results_{timestamp}.json'
+    """Save evaluation results to a JSON file with a descriptive name."""
+    result_file = output_dir / f"{output_dir.name}.json"
     
     with open(result_file, 'w') as f:
         json.dump(results, f, indent=4)
@@ -54,7 +59,7 @@ def normalize_data(data, logger):
 
 
 def load_data(data_directory, isolates_path, logger):
-    """Load, normalize, and prepare the dataset"""
+    """Load, normalize, and prepare the dataset."""
     logger.info("Loading simulated data from %s", data_directory)
     all_n_values = load_simulated_data(data_directory, logger)
     
@@ -76,7 +81,7 @@ def load_data(data_directory, isolates_path, logger):
 
 
 def get_model(model_type, latent_dim, latent_channel, seq_length, logger):
-    """Initialize the specified model"""
+    """Initialize the specified model."""
     logger.info("Initializing %s model", model_type)
     model_classes = {
         'VAE': VAE,
@@ -95,7 +100,7 @@ def get_model(model_type, latent_dim, latent_channel, seq_length, logger):
 
 
 def evaluate_saved_model(args, logger):
-    """Evaluate a saved model with the specified parameters"""
+    """Evaluate a saved model with the specified parameters."""
     # Load and normalize data
     data, scaler = load_data(args.data_directory, args.isolates_path, logger)
     
@@ -150,7 +155,7 @@ def evaluate_saved_model(args, logger):
 
 
 def parse_arguments():
-    """Parse command line arguments"""
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(description='Evaluate a trained VAE model')
     parser.add_argument('--model-type', type=str, default='ResidualCNNVAE',
                       choices=['VAE', 'DeepCNNVAE', 'ResidualCNNVAE'],
@@ -163,12 +168,6 @@ def parse_arguments():
     parser.add_argument('--isolates-path', type=Path,
                       default='data/isolates/OD_311_isolates.npz',
                       help='Path to isolates data file')
-    parser.add_argument('--output-dir', type=Path,
-                      default='evaluation_results',
-                      help='Directory to save evaluation results')
-    parser.add_argument('--log-dir', type=Path,
-                      default='logs',
-                      help='Directory to save log files')
     parser.add_argument('--latent-dim', type=int, default=10,
                       help='Dimension of latent space')
     parser.add_argument('--latent-channel', type=int, default=16,
@@ -180,7 +179,18 @@ def parse_arguments():
 
 if __name__ == "__main__":
     args = parse_arguments()
-    logger = setup_logger(args.log_dir)
+    
+    # Create output directory with descriptive name
+    base_output_dir = "mse_evaluation_results"
+    args.output_dir = create_output_dir(
+        base_output_dir,
+        args.model_type,
+        args.latent_dim,
+        args.latent_channel,
+    )
+    
+    # Set up logger
+    logger = setup_logger(args.output_dir)
     
     try:
         mse = evaluate_saved_model(args, logger)
