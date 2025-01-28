@@ -1,0 +1,72 @@
+2025-01-26 22:01:12,363 - INFO - Model type identified: ResidualCNNVAE
+2025-01-26 22:01:12,363 - INFO - Model type identified: ResidualCNNVAE
+2025-01-26 22:01:12,363 - INFO - Starting parameter validation
+2025-01-26 22:01:12,363 - INFO - Starting parameter validation
+2025-01-26 22:01:12,363 - INFO - Loading simulation data...
+2025-01-26 22:01:12,363 - INFO - Loading simulation data...
+2025-01-26 22:01:12,363 - INFO - Loading simulated data from data/simulated/curves10k.npz
+2025-01-26 22:01:12,363 - INFO - Loading simulated data from data/simulated/curves10k.npz
+2025-01-26 22:01:13,471 - INFO - Simulated data shape: (10000, 435)
+2025-01-26 22:01:13,471 - INFO - Simulated data shape: (10000, 435)
+2025-01-26 22:01:13,472 - INFO - Loading isolates data...
+2025-01-26 22:01:13,472 - INFO - Loading isolates data...
+2025-01-26 22:01:13,472 - INFO - Loading isolates data from data/isolates/OD_311_isolates.npz
+2025-01-26 22:01:13,472 - INFO - Loading isolates data from data/isolates/OD_311_isolates.npz
+2025-01-26 22:01:13,507 - INFO - Isolates data shape: (311, 12, 435)
+2025-01-26 22:01:13,507 - INFO - Isolates data shape: (311, 12, 435)
+2025-01-26 22:01:13,535 - INFO - Combined data shape after shuffling: (13732, 435)
+2025-01-26 22:01:13,535 - INFO - Combined data shape after shuffling: (13732, 435)
+2025-01-26 22:01:13,535 - INFO - Loading parameters...
+2025-01-26 22:01:13,535 - INFO - Loading parameters...
+2025-01-26 22:01:14,550 - INFO - Setting up simulation runner...
+2025-01-26 22:01:14,550 - INFO - Setting up simulation runner...
+2025-01-26 22:01:14,550 - INFO - Running simulations with estimated parameters...
+2025-01-26 22:01:14,550 - INFO - Running simulations with estimated parameters...
+2025-01-26 22:02:27,309 - INFO - Computing R² scores for curves...
+2025-01-26 22:02:27,309 - INFO - Computing R² scores for curves...
+2025-01-26 22:02:27,344 - INFO - Condition: a0=0, inh0=0, R² for n (Population): 0.975,MAR: 0.103, RMSE: 0.149 
+2025-01-26 22:02:27,344 - INFO - Condition: a0=0, inh0=0, R² for n (Population): 0.975,MAR: 0.103, RMSE: 0.149 
+2025-01-26 22:02:27,375 - INFO - Condition: a0=0, inh0=0, R² for b (Bla): 1.000,MAR: 0.000, RMSE: 0.000 
+2025-01-26 22:02:27,375 - INFO - Condition: a0=0, inh0=0, R² for b (Bla): 1.000,MAR: 0.000, RMSE: 0.000 
+2025-01-26 22:02:27,405 - INFO - Condition: a0=0, inh0=0, R² for a (Antibiotic): 1.000,MAR: 0.000, RMSE: 0.000 
+2025-01-26 22:02:27,405 - INFO - Condition: a0=0, inh0=0, R² for a (Antibiotic): 1.000,MAR: 0.000, RMSE: 0.000 
+2025-01-26 22:02:27,435 - INFO - Condition: a0=10, inh0=0, R² for n (Population): 0.958,MAR: 0.116, RMSE: 0.230 
+2025-01-26 22:02:27,435 - INFO - Condition: a0=10, inh0=0, R² for n (Population): 0.958,MAR: 0.116, RMSE: 0.230 
+2025-01-26 22:02:27,465 - INFO - Condition: a0=10, inh0=0, R² for b (Bla): 0.700,MAR: 0.186, RMSE: 0.305 
+2025-01-26 22:02:27,465 - INFO - Condition: a0=10, inh0=0, R² for b (Bla): 0.700,MAR: 0.186, RMSE: 0.305 
+2025-01-26 22:02:27,495 - INFO - Condition: a0=10, inh0=0, R² for a (Antibiotic): 0.861,MAR: 0.617, RMSE: 1.409 
+2025-01-26 22:02:27,495 - INFO - Condition: a0=10, inh0=0, R² for a (Antibiotic): 0.861,MAR: 0.617, RMSE: 1.409 
+2025-01-26 22:02:27,523 - INFO - Condition: a0=10, inh0=10, R² for n (Population): 0.951,MAR: 0.110, RMSE: 0.247 
+2025-01-26 22:02:27,523 - INFO - Condition: a0=10, inh0=10, R² for n (Population): 0.951,MAR: 0.110, RMSE: 0.247 
+2025-01-26 22:02:27,553 - INFO - Condition: a0=10, inh0=10, R² for b (Bla): 0.438,MAR: 0.014, RMSE: 0.042 
+2025-01-26 22:02:27,553 - INFO - Condition: a0=10, inh0=10, R² for b (Bla): 0.438,MAR: 0.014, RMSE: 0.042 
+2025-01-26 22:02:27,583 - INFO - Condition: a0=10, inh0=10, R² for a (Antibiotic): 0.833,MAR: 0.792, RMSE: 1.711 
+2025-01-26 22:02:27,583 - INFO - Condition: a0=10, inh0=10, R² for a (Antibiotic): 0.833,MAR: 0.792, RMSE: 1.711 
+2025-01-26 22:02:27,587 - INFO - Generating curve comparison plots...
+2025-01-26 22:02:27,587 - INFO - Generating curve comparison plots...
+2025-01-26 22:02:48,369 - INFO - Computing parameter R² scores...
+2025-01-26 22:02:48,369 - INFO - Computing parameter R² scores...
+2025-01-26 22:02:48,373 - INFO - alpha: R² = 0.970
+2025-01-26 22:02:48,373 - INFO - alpha: R² = 0.970
+2025-01-26 22:02:48,516 - INFO - Ks: R² = 0.813
+2025-01-26 22:02:48,516 - INFO - Ks: R² = 0.813
+2025-01-26 22:02:48,661 - INFO - Nm: R² = 0.578
+2025-01-26 22:02:48,661 - INFO - Nm: R² = 0.578
+2025-01-26 22:02:48,819 - INFO - theta: R² = 0.455
+2025-01-26 22:02:48,819 - INFO - theta: R² = 0.455
+2025-01-26 22:02:48,995 - INFO - kappab: R² = 0.096
+2025-01-26 22:02:48,995 - INFO - kappab: R² = 0.096
+2025-01-26 22:02:49,157 - INFO - phimax: R² = 0.175
+2025-01-26 22:02:49,157 - INFO - phimax: R² = 0.175
+2025-01-26 22:02:49,319 - INFO - gamma: R² = 0.504
+2025-01-26 22:02:49,319 - INFO - gamma: R² = 0.504
+2025-01-26 22:02:49,490 - INFO - betamin: R² = 0.385
+2025-01-26 22:02:49,490 - INFO - betamin: R² = 0.385
+2025-01-26 22:02:49,664 - INFO - db: R² = 0.015
+2025-01-26 22:02:49,664 - INFO - db: R² = 0.015
+2025-01-26 22:02:49,792 - INFO - c: R² = 0.032
+2025-01-26 22:02:49,792 - INFO - c: R² = 0.032
+2025-01-26 22:02:49,976 - INFO - Saving results...
+2025-01-26 22:02:49,976 - INFO - Saving results...
+2025-01-26 22:02:50,209 - INFO - Parameter validation completed successfully
+2025-01-26 22:02:50,209 - INFO - Parameter validation completed successfully
