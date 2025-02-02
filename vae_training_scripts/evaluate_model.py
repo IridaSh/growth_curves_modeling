@@ -69,15 +69,15 @@ def load_data(data_directory, isolates_path, logger):
     # Combine data
     all_data = np.vstack([all_n_values, reshaped_od_values])
     
-    # Normalize the data
-    normalized_data, scaler = normalize_data(all_data, logger)
-    
-    # Shuffle and convert to torch tensor
+    # Shuffle and convert to torch tensor (matching main.py normalization)
     np.random.seed(42)
-    np.random.shuffle(normalized_data)
-    data = torch.tensor(normalized_data).float().unsqueeze(1)
+    np.random.shuffle(all_data)
+    data = torch.tensor(all_data).float().unsqueeze(1)  # [batch, 1, seq_length]
     
-    return data, scaler
+    logger.info(f"Combined data shape: {data.shape}")
+    logger.info(f"Data range: [{data.min():.4f}, {data.max():.4f}]")
+    
+    return data, None  # Return None instead of scaler since we're not using MinMaxScaler
 
 
 def get_model(model_type, latent_dim, latent_channel, seq_length, logger):
@@ -102,7 +102,7 @@ def get_model(model_type, latent_dim, latent_channel, seq_length, logger):
 def evaluate_saved_model(args, logger):
     """Evaluate a saved model with the specified parameters."""
     # Load and normalize data
-    data, scaler = load_data(args.data_directory, args.isolates_path, logger)
+    data, _ = load_data(args.data_directory, args.isolates_path, logger)
     
     # Split the data
     train_data, test_data, _, _ = train_test_split(
@@ -130,10 +130,23 @@ def evaluate_saved_model(args, logger):
     model.load_state_dict(torch.load(args.model_path))
     model = model.to(device)
     
-    # Calculate MSE
+    # Calculate MSE with more detailed logging
     logger.info("Calculating reconstruction MSE")
+    logger.info(f"Test data shape: {test_data.shape}")
+    logger.info(f"Test data range: [{test_data.min():.4f}, {test_data.max():.4f}]")
+    
     mse = calculate_mse(model, test_loader, device)
-    logger.info("Reconstruction MSE: %.7f", mse)
+    
+    # Log reconstructions for a small batch
+    with torch.no_grad():
+        sample_batch = next(iter(test_loader)).to(device)
+        reconstruction, _, _ = model(sample_batch)
+        sample_mse = torch.mean((reconstruction - sample_batch) ** 2).item()
+        logger.info(f"Sample batch MSE: {sample_mse:.7f}")
+        logger.info(f"Sample input range: [{sample_batch.min():.4f}, {sample_batch.max():.4f}]")
+        logger.info(f"Sample reconstruction range: [{reconstruction.min():.4f}, {reconstruction.max():.4f}]")
+    
+    logger.info(f"Overall reconstruction MSE: {mse:.7f}")
     
     # Prepare and save results
     results = {
