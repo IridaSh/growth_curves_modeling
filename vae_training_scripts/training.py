@@ -65,3 +65,5 @@ def calculate_mse(model, dataloader, device):
             mse_values.append(mse)
     avg_mse = sum(mse_values) / len(mse_values)
     return avg_mse
+
+#double check the mse calculation 

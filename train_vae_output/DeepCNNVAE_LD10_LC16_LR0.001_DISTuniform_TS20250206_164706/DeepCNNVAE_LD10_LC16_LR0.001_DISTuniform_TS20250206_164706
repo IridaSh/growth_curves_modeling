@@ -1,0 +1,31 @@
+2025-02-06 16:47:06,509 - INFO - Model type received: DeepCNNVAE
+2025-02-06 16:47:06,509 - INFO - Distribution type received: uniform
+2025-02-06 16:47:06,509 - INFO - Using data directory: data/simulated_uniform/
+2025-02-06 16:47:06,516 - INFO - Loading simulated data from data/simulated_uniform/
+2025-02-06 16:47:06,516 - INFO - Loading simulated data from data/simulated_uniform/curves10k.npz
+2025-02-06 16:47:07,942 - INFO - Simulated data shape: (10000, 435)
+2025-02-06 16:47:07,942 - INFO - Loading isolates data from data/isolates/OD_311_isolates.npz
+2025-02-06 16:47:07,942 - INFO - Loading isolates data from data/isolates/OD_311_isolates.npz
+2025-02-06 16:47:08,086 - INFO - Isolates data shape: (311, 12, 435)
+2025-02-06 16:47:08,125 - INFO - Combined data shape after shuffling: (13732, 435)
+2025-02-06 16:47:08,487 - INFO - Using device: cuda
+2025-02-06 16:47:08,504 - INFO - CUDA is available. Device count: 1
+2025-02-06 16:47:08,514 - INFO - Current device: 0
+2025-02-06 16:47:08,514 - INFO - Device name: NVIDIA RTX A5000
+2025-02-06 16:47:08,628 - INFO - The model DeepCNNVAE is currently being trained
+2025-02-06 16:47:08,852 - INFO - The model has 361,717 parameters
+2025-02-06 16:47:19,509 - INFO - Starting training loop...
+2025-02-06 16:47:36,908 - INFO - Epoch: 2 | Train Loss: 0.1187600, Test Loss: 0.0345625, Lr: 0.00030000
+2025-02-06 16:47:46,716 - INFO - Epoch: 4 | Train Loss: 0.0215901, Test Loss: 0.0109827, Lr: 0.00050000
+2025-02-06 16:47:54,334 - INFO - Epoch: 6 | Train Loss: 0.0171439, Test Loss: 0.0096818, Lr: 0.00070000
+2025-02-06 16:48:02,487 - INFO - Epoch: 8 | Train Loss: 0.0108592, Test Loss: 0.0059850, Lr: 0.00090000
+2025-02-06 16:48:12,669 - INFO - Epoch: 10 | Train Loss: 0.0155966, Test Loss: 0.0068868, Lr: 0.00100000
+2025-02-06 16:50:40,735 - INFO - Epoch: 40 | Train Loss: 0.0031185, Test Loss: 0.0019045, Lr: 0.00054548
+2025-02-06 16:54:09,933 - INFO - Epoch: 80 | Train Loss: 0.0010717, Test Loss: 0.0005493, Lr: 0.00024312
+2025-02-06 16:57:39,756 - INFO - Epoch: 120 | Train Loss: 0.0007870, Test Loss: 0.0004105, Lr: 0.00010836
+2025-02-06 17:01:00,751 - INFO - Epoch: 160 | Train Loss: 0.0007924, Test Loss: 0.0003382, Lr: 0.00004830
+2025-02-06 17:04:09,800 - INFO - Epoch: 200 | Train Loss: 0.0004864, Test Loss: 0.0002961, Lr: 0.00002153
+2025-02-06 17:07:06,629 - INFO - Epoch: 240 | Train Loss: 0.0004673, Test Loss: 0.0003045, Lr: 0.00000959
+2025-02-06 17:09:48,237 - INFO - Early stopping triggered!
+2025-02-06 17:09:49,576 - INFO - Training completed.
+2025-02-06 17:09:49,701 - INFO - Best model saved to train_vae_output/DeepCNNVAE_LD10_LC16_LR0.001_DISTuniform_TS20250206_164706/models/best_model.pt

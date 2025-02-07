@@ -2,6 +2,7 @@
 import logging
 import os
 from datetime import datetime
+from pathlib import Path
 
 def setup_logging(log_file='vae_training.log'):
     """Setup logging configuration."""
@@ -10,7 +11,7 @@ def setup_logging(log_file='vae_training.log'):
     logger = logging.getLogger()
     return logger
 
-def create_output_dir(base_output_dir='output', model_type='VAE', latent_dim=10, latent_channel=16, lr=1e-3):
+def create_output_dir(base_output_dir, model_type, latent_dim, latent_channel, lr, distribution_type):
     """
     Create a unique output directory based on model configuration and timestamp.
     
@@ -20,12 +21,16 @@ def create_output_dir(base_output_dir='output', model_type='VAE', latent_dim=10,
     - latent_dim (int): Dimension of the latent space.
     - latent_channel (int): Number of latent channels.
     - lr (float): Learning rate.
+    - distribution_type (str): Type of distribution used for simulation.
     
     Returns:
     - output_dir (str): Path to the created output directory.
     """
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    dir_name = f"{model_type}_LD{latent_dim}_LC{latent_channel}_LR{lr}_TS{timestamp}"
-    output_dir = os.path.join(base_output_dir, dir_name)
-    os.makedirs(output_dir, exist_ok=True)
-    return output_dir
+    dir_name = f"{model_type}_LD{latent_dim}_LC{latent_channel}_LR{lr}_DIST{distribution_type}_TS{timestamp}"
+    
+    # Create the full path
+    output_dir = Path(base_output_dir) / dir_name
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    return str(output_dir)
