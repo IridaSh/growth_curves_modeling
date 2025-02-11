@@ -20,6 +20,7 @@ if parent_dir not in sys.path:
 from vae_training_scripts.models.shallow_cnn_vae import VAE
 from vae_training_scripts.models.deep_cnn_vae import DeepCNNVAE
 from vae_training_scripts.models.residual_cnn_vae import ResidualCNNVAE
+from vae_training_scripts.models.transformer_vae import TransformerVAE
 import argparse
 from datetime import datetime
 
@@ -46,19 +47,24 @@ def main(args):
     percentage = 0.2
 
     # Validate model choice
-    valid_models = ['VAE', 'DeepCNNVAE', 'ResidualCNNVAE']
+    valid_models = ['VAE', 'DeepCNNVAE', 'ResidualCNNVAE', 'TransformerVAE']
     if args.model not in valid_models:
         raise ValueError(f"Invalid model choice '{args.model}'. Valid options are: {valid_models}")
     
     # File paths configuration
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Detect distribution type from data file path
+    distribution_type = 'uniform' if 'simulated_uniform' in args.data_file else 'truncnorm'
+    
     model_name = (
         'VAE' if args.model == 'VAE' else
         'DeepCNNVAE' if args.model == 'DeepCNNVAE' else
+        'TransformerVAE' if args.model == 'TransformerVAE' else
         'ResidualCNNVAE'
     )
     
-    output_dir = f'train_vae_mlp_output/{model_name}_LD{latent_dim}_LC{latent_channel}_LR{lr}_TS{timestamp}'
+    output_dir = f'train_vae_mlp_output/{model_name}_LD{latent_dim}_LC{latent_channel}_LR{lr}_DIST{distribution_type}_TS{timestamp}'
     
     # Create directory structure
     plots_dir = os.path.join(output_dir, 'plots')
@@ -105,7 +111,9 @@ def main(args):
         vae_model = DeepCNNVAE(latent_dim, latent_channel, input_size).to(device)
     elif args.model == 'ResidualCNNVAE':
         vae_model = ResidualCNNVAE(latent_dim, latent_channel, input_size).to(device)
-    
+    elif args.model == "TransformerVAE":
+        vae_model = TransformerVAE(
+            latent_dim=latent_dim, seq_length=input_size, nhead=4,num_layers=3).to(device)    
     logging.info(f'{model_name} model instantiated.')
 
     # Load and freeze VAE
@@ -209,7 +217,7 @@ if __name__ == '__main__':
     
     # Model configuration
     parser.add_argument('--model', type=str, default='VAE',
-                       choices=['VAE', 'DeepCNNVAE', 'ResidualCNNVAE'],
+                       choices=['VAE', 'DeepCNNVAE', 'ResidualCNNVAE', 'TransformerVAE'],
                        help='Choice of VAE architecture')
     
     # Data paths
